@@ -12,6 +12,7 @@ public class getToken {
     public static final int DONE=0;
     public static final int ERROR=1;
     public static final int INNUM=2;
+    public static final int INFLOAT=9;
     public static final int INID=3;
     public static final int INASSIGN=4;
     public static final int INCOMMENT=5;
@@ -28,6 +29,9 @@ public class getToken {
         reserved.add("else");
         reserved.add("return");
         reserved.add("void");
+        reserved.add("char");
+        reserved.add("switch");
+        reserved.add("case");
     }
 
     public static void readToken(String fileName) throws IOException {
@@ -39,6 +43,8 @@ public class getToken {
             StringBuilder currentToken = new StringBuilder(10);
             int TokenType=0;
             int state = START;
+            int FloatState=0;//浮点数的状态转换
+            int FloatFlag=0;//记录浮点数的形式，E或.
             boolean save = true;
             while (state != DONE) {
                 int Ch = 0;
@@ -129,11 +135,117 @@ public class getToken {
                             state = INNUM;
                         } else if (Character.isLetter(Ch)) {
                             state = ERROR;
+                        }else if(Ch=='.'||Ch=='e'||Ch=='E'){
+                            if(Ch=='.'){
+                                FloatFlag=0;
+                            }else{
+                                FloatFlag=1;
+                            }
+                            currentToken.append((char)Ch);
+                            state=INFLOAT;
                         } else {
                             unget = true;
                             beforeCh = Ch;
                             TokenType=NUM;
                             state = DONE;//字符回退
+                        }
+                        break;
+                    case INFLOAT:
+                        if(FloatFlag==0){
+                            switch (FloatState){
+                                case 0:
+                                    if(Character.isDigit(Ch)){
+                                        FloatState=1;
+                                        currentToken.append((char)Ch);
+                                    }else{
+                                        unget = true;
+                                        beforeCh = Ch;
+                                        state=ERROR;
+                                    }
+                                    break;
+                                case 1:
+                                    if(Character.isDigit(Ch)){
+                                        FloatState=1;
+                                        currentToken.append((char)Ch);
+                                    }else if(Ch=='e'||Ch=='E'){
+                                        FloatState=2;
+                                        currentToken.append((char)Ch);
+                                    }else{
+                                        unget = true;
+                                        beforeCh = Ch;
+                                        state = DONE;//字符回退
+                                    }
+                                    break;
+                                case 2:
+                                    if(Ch=='+'||Ch=='-'){
+                                        FloatState=3;
+                                        currentToken.append((char)Ch);
+                                    }else if(Character.isDigit(Ch)){
+                                        FloatState=4;
+                                        currentToken.append((char)Ch);
+                                    }else{
+                                        unget = true;
+                                        beforeCh = Ch;
+                                        state=ERROR;
+                                    }
+                                    break;
+                                case 3:
+                                    if(Character.isDigit(Ch)){
+                                        FloatState=4;
+                                        currentToken.append((char)Ch);
+                                    }else {
+                                        unget = true;
+                                        beforeCh = Ch;
+                                        state=ERROR;
+                                    }
+                                    break;
+                                case 4:
+                                    if(Character.isDigit(Ch)){
+                                        FloatState=4;
+                                        currentToken.append((char)Ch);
+                                    }else{
+                                        unget = true;
+                                        beforeCh = Ch;
+                                        state = DONE;//字符回退
+                                    }
+                                    break;
+                            }
+                        }else if(FloatFlag==1){
+                            switch (FloatState){
+                                case 0:
+                                    if(Ch=='+'||Ch=='-'){
+                                        FloatState=3;
+                                        currentToken.append((char)Ch);
+                                    }else if(Character.isDigit(Ch)){
+                                        FloatState=4;
+                                        currentToken.append((char)Ch);
+                                    }else{
+                                        unget = true;
+                                        beforeCh = Ch;
+                                        state=ERROR;
+                                    }
+                                    break;
+                                case 1:
+                                    if(Character.isDigit(Ch)){
+                                        FloatState=4;
+                                        currentToken.append((char)Ch);
+                                    }else {
+                                        unget = true;
+                                        beforeCh = Ch;
+                                        state=ERROR;
+                                    }
+                                    break;
+                                case 2:
+                                    if(Character.isDigit(Ch)){
+                                        FloatState=4;
+                                        currentToken.append((char)Ch);
+                                    }else{
+                                        unget = true;
+                                        beforeCh = Ch;
+                                        state = DONE;//字符回退
+                                    }
+                                    break;
+                            }
                         }
                         break;
                     case INASSIGN:
