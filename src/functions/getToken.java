@@ -8,20 +8,21 @@ import java.util.List;
 
 
 public class getToken {
-    public static final int START=-1;
-    public static final int DONE=0;
-    public static final int ERROR=1;
-    public static final int INNUM=2;
-    public static final int INFLOAT=9;
-    public static final int INID=3;
-    public static final int INASSIGN=4;
-    public static final int INCOMMENT=5;
-    public static final int INCOMP=6;
-    public static final int ID=7;
-    public static final int NUM=8;
-    public static final List<String> reserved=new ArrayList<String>();
+    public final int START=-1;
+    public final int DONE=0;
+    public final int ERROR=1;
+    public final int INNUM=2;
+    public final int INFLOAT=9;
+    public final int INID=3;
+    public final int INASSIGN=4;
+    public final int INCOMMENT=5;
+    public final int INCOMP=6;
+    public final int ID=7;
+    public final int NUM=8;
+    public final List<String> reserved=new ArrayList<String>();
+    private FileReader input;
 
-    public getToken(){
+    public getToken(String filePath) throws IOException{
         reserved.add("int");
         reserved.add("float");
         reserved.add("long");
@@ -32,15 +33,16 @@ public class getToken {
         reserved.add("char");
         reserved.add("switch");
         reserved.add("case");
+        input = new FileReader(filePath);
     }
 
-    public static void readToken(String fileName) throws IOException {
-        FileReader input = new FileReader(fileName);
+    public StringBuilder readToken() throws IOException {
+        StringBuilder currentToken = new StringBuilder(10);
         boolean EOF=false;
         boolean unget = false;
         int beforeCh = 0;
-        while(!EOF) {
-            StringBuilder currentToken = new StringBuilder(10);
+        if(!EOF) {
+            currentToken = new StringBuilder(10);
             int TokenType=0;
             int state = START;
             int FloatState=0;//浮点数的状态转换
@@ -319,16 +321,15 @@ public class getToken {
             if (save == true&&currentToken.length()!=0) {
                 if (TokenType == ID) {
                     if(reserved.contains(currentToken.toString())){
-                        System.out.println(currentToken);
+                        currentToken.append("\\reserved");
                     }else{
-                        System.out.println("id,"+currentToken);
+                        currentToken.append("\\id");
                     }
                 }else if(TokenType==NUM){
-                    System.out.println("num,"+currentToken);
-                }else{
-                    System.out.println(currentToken);
+                    currentToken.append("\\num");
                 }
             }
         }
+        return currentToken;
     }
 }
