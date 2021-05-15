@@ -13,13 +13,10 @@ public class scanner {//创建对象，代表文件的字符流
 
     public scanner(String filePath) throws IOException{
         reserved.add("int");
-        reserved.add("float");
-        reserved.add("long");
         reserved.add("if");
         reserved.add("else");
         reserved.add("return");
         reserved.add("void");
-        reserved.add("char");
         reserved.add("switch");
         reserved.add("case");
         input = new FileReader(filePath);

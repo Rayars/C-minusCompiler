@@ -5,13 +5,28 @@ public class sTreeNode {
     private TokenType op;//运算符类型
     private int val;//常量值
     private StringBuilder name;//ID
-    private sTreeNode leftChild,rightChild;
+    public sTreeNode leftChild,rightChild;
 
-    public class ExpKind{
-
+    public enum ExpKind{
+        operator,val,name,
     }
 
-    public class TokenType{
+    public enum TokenType{
+        compare,assign,op
+    }
 
+    public sTreeNode(){
+
+    }
+    public sTreeNode(ExpKind k,StringBuilder n){
+        kind=k;name=n;
+    }
+
+    public sTreeNode(ExpKind k,TokenType tt){
+        kind=k;op=tt;
+    }
+
+    public sTreeNode(ExpKind k,int v){
+        kind=k;val=v;
     }
 }
