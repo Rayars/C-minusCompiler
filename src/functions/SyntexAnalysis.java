@@ -5,35 +5,38 @@ import java.io.IOException;
 
 public class SyntexAnalysis {
 
-    private StringBuilder currentToken;
-    private getToken Tokens;
+    private Token currentToken;//当前token
+    private scanner input;//文件流对象
+    private sTreeNode SyntexTree;
 
-    public SyntexAnalysis() throws IOException {
-        Tokens=new getToken("C:\\Users\\27545\\IdeaProjects\\C-minusCompiler\\src\\test.txt");
-        currentToken=Tokens.readToken();
+    public SyntexAnalysis(String filepath) throws IOException {
+        input=new scanner(filepath);
+        currentToken=input.readToken();
+        SyntexTree=program();
     }
 
     public void match(StringBuilder Vn) throws IOException{
-        if(Vn==currentToken){
-            currentToken=Tokens.readToken();
-        }else{
-            error();
-        }
+
     }
 
     public void error(){
 
     }
 
-    public void program() throws IOException{
-        stmt_sequence();
+    public sTreeNode program() throws IOException{
+        sTreeNode temp=declaration_list();
+        return temp;
     }
 
-    public void stmt_sequence() throws IOException{
-        statement();
-        StringBuilder Vt=new StringBuilder("10");
-        Vt.append(";");
-        match(Vt);
+    public sTreeNode declaration_list() throws IOException{
+        sTreeNode temp=declaration();
+        if(input.HasNextToken()){
+            declaration_list();
+        }
+        return temp;
+    }
+
+    public sTreeNode declaration() throws IOException{
 
     }
 

@@ -5,22 +5,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class getToken {
-    public final int START=-1;
-    public final int DONE=0;
-    public final int ERROR=1;
-    public final int INNUM=2;
-    public final int INFLOAT=9;
-    public final int INID=3;
-    public final int INASSIGN=4;
-    public final int INCOMMENT=5;
-    public final int INCOMP=6;
-    public final int ID=7;
-    public final int NUM=8;
-    public final List<String> reserved=new ArrayList<String>();
-    private FileReader input;
+public class scanner {//创建对象，代表文件的字符流
+    private final int START=-1,DONE=0,ERROR=1,INNUM=2,INFLOAT=9,INID=3,INASSIGN=4,INCOMMENT=5,INCOMP=6;
+    private final List<String> reserved=new ArrayList<String>();//保留字列表
+    private FileReader input;//文件字符流
+    private boolean hasNextToken=true;
 
-    public getToken(String filePath) throws IOException{
+    public scanner(String filePath) throws IOException{
         reserved.add("int");
         reserved.add("float");
         reserved.add("long");
@@ -34,11 +25,12 @@ public class getToken {
         input = new FileReader(filePath);
     }
 
-    public StringBuilder readToken() throws IOException {
+    public Token readToken() throws IOException {//返回读取的token
         StringBuilder currentToken = new StringBuilder(10);
         boolean EOF=false;
         boolean unget = false;
         int beforeCh = 0;
+        Token newToken=new Token();
         if(!EOF) {
             currentToken = new StringBuilder(10);
             int TokenType=0;
@@ -62,7 +54,7 @@ public class getToken {
                         } else if (Character.isDigit(Ch)) {
                             currentToken.append((char)Ch);
                             state = INNUM;
-                        } else if (Ch == ':') {//赋值
+                        }else if (Ch == ':') {//赋值
                             currentToken.append((char)Ch);
                             state = INASSIGN;
                         } else if (Ch == '/') {
@@ -81,36 +73,47 @@ public class getToken {
                                     break;//同EOF
                                 case '+':
                                     currentToken.append('+');
+                                    TokenType=Token.Op;
                                     break;
                                 case '-':
                                     currentToken.append('-');
+                                    TokenType=Token.Op;
                                     break;
                                 case '*':
                                     currentToken.append('*');
+                                    TokenType=Token.Op;
                                     break;
                                 case '(':
                                     currentToken.append('(');
+                                    TokenType=Token.Bound;
                                     break;
                                 case ')':
                                     currentToken.append(')');
+                                    TokenType=Token.Bound;
                                     break;
                                 case '[':
                                     currentToken.append('[');
+                                    TokenType=Token.Bound;
                                     break;
                                 case ']':
                                     currentToken.append(']');
+                                    TokenType=Token.Bound;
                                     break;
                                 case '{':
                                     currentToken.append('{');
+                                    TokenType=Token.Bound;
                                     break;
                                 case '}':
                                     currentToken.append('}');
+                                    TokenType=Token.Bound;
                                     break;
                                 case ';':
                                     currentToken.append(';');
+                                    TokenType=Token.Bound;
                                     break;
                                 case ',':
                                     currentToken.append(',');
+                                    TokenType=Token.Bound;
                                     break;
                                 default:
                                     state = ERROR;
@@ -125,7 +128,7 @@ public class getToken {
                         } else {
                             unget = true;
                             beforeCh = Ch;
-                            TokenType=ID;
+                            TokenType=Token.ID;
                             state = DONE;//字符回退
                         }
                         break;
@@ -146,7 +149,7 @@ public class getToken {
                         } else {
                             unget = true;
                             beforeCh = Ch;
-                            TokenType=NUM;
+                            TokenType=Token.Num;
                             state = DONE;//字符回退
                         }
                         break;
@@ -173,6 +176,7 @@ public class getToken {
                                     }else{
                                         unget = true;
                                         beforeCh = Ch;
+                                        TokenType=Token.Num;
                                         state = DONE;//字符回退
                                     }
                                     break;
@@ -206,6 +210,7 @@ public class getToken {
                                     }else{
                                         unget = true;
                                         beforeCh = Ch;
+                                        TokenType=Token.Num;
                                         state = DONE;//字符回退
                                     }
                                     break;
@@ -214,10 +219,10 @@ public class getToken {
                             switch (FloatState){
                                 case 0:
                                     if(Ch=='+'||Ch=='-'){
-                                        FloatState=3;
+                                        FloatState=1;
                                         currentToken.append((char)Ch);
                                     }else if(Character.isDigit(Ch)){
-                                        FloatState=4;
+                                        FloatState=2;
                                         currentToken.append((char)Ch);
                                     }else{
                                         unget = true;
@@ -227,7 +232,7 @@ public class getToken {
                                     break;
                                 case 1:
                                     if(Character.isDigit(Ch)){
-                                        FloatState=4;
+                                        FloatState=2;
                                         currentToken.append((char)Ch);
                                     }else {
                                         unget = true;
@@ -237,11 +242,12 @@ public class getToken {
                                     break;
                                 case 2:
                                     if(Character.isDigit(Ch)){
-                                        FloatState=4;
+                                        FloatState=2;
                                         currentToken.append((char)Ch);
                                     }else{
                                         unget = true;
                                         beforeCh = Ch;
+                                        TokenType=Token.Num;
                                         state = DONE;//字符回退
                                     }
                                     break;
@@ -251,6 +257,7 @@ public class getToken {
                     case INASSIGN:
                         if (Ch == '=') {
                             currentToken.append(Ch);
+                            TokenType=Token.Op;
                             state = DONE;
                         } else {
                             unget = true;
@@ -299,10 +306,12 @@ public class getToken {
                     case INCOMP:
                         if (Ch == '=') {
                             currentToken.append('=');
+                            TokenType=Token.Op;
                             state = DONE;
                         } else {
                             unget = true;
                             beforeCh = Ch;
+                            TokenType=Token.Op;
                             state = DONE;
                         }
                         break;
@@ -317,17 +326,19 @@ public class getToken {
                 }
             }
             if (save == true&&currentToken.length()!=0) {
-                if (TokenType == ID) {
-                    if(reserved.contains(currentToken.toString())){
-                        currentToken.append("\\reserved");
-                    }else{
-                        currentToken.append("\\id");
-                    }
-                }else if(TokenType==NUM){
-                    currentToken.append("\\num");
+                if(reserved.contains(currentToken.toString())){
+                    TokenType=Token.Reserved;
                 }
+                newToken=new Token(TokenType,currentToken);
             }
+        }else{
+            hasNextToken=false;
         }
-        return currentToken;
+        return newToken;
+    }
+
+    public boolean HasNextToken(){
+        return hasNextToken;
     }
 }
+
