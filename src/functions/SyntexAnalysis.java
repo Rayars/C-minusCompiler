@@ -78,7 +78,8 @@ public class SyntexAnalysis {
     }
 
     public sTreeNode fun_declaration() throws IOException{
-
+        sTreeNode temp=new sTreeNode();
+        return temp;
     }
 
     public void statement(){
