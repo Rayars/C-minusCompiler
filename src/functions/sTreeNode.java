@@ -2,31 +2,71 @@ package functions;
 
 public class sTreeNode {
     private ExpKind kind;//节点类型
-    private TokenType op;//运算符类型
+    private OPType operator;//运算符类型
     private int val;//常量值
     private StringBuilder name;//ID
-    public sTreeNode leftChild,rightChild;
+    private int MaxChildren;
+    public sTreeNode[] Children;
+    public sTreeNode sibling;
 
     public enum ExpKind{
-        operator,val,name,
+        operator,val,Identifier,expression,IfStmt,Program,declaration,
+        fun_declaration,var_declaration,var_num,type,
     }
 
-    public enum TokenType{
-        compare,assign,op
+    public enum OPType{
+        plus("+"),
+        minus("-"),
+        mult("*"),
+        div("/"),
+        EQ("=="),
+        NE("!="),
+        GT(">"),
+        LT("<"),
+        GE(">="),
+        LE("<="),
+        assign("=");
+
+        private String OP;
+        OPType(String Op){
+            this.OP=Op;
+        }
+
+        public String getOP(){
+            return OP;
+        }
     }
 
-    public sTreeNode(){
-
-    }
-    public sTreeNode(ExpKind k,StringBuilder n){
-        kind=k;name=n;
+    public sTreeNode(int Max){
+        MaxChildren=Max;
+        Children=new sTreeNode[Max];
     }
 
-    public sTreeNode(ExpKind k,TokenType tt){
-        kind=k;op=tt;
+    public void setKind(ExpKind kind){
+        this.kind=kind;
     }
 
-    public sTreeNode(ExpKind k,int v){
-        kind=k;val=v;
+    public void setOperator(OPType op){
+        this.operator=op;
+    }
+
+    public void setVal(int val){
+        this.val=val;
+    }
+
+    public ExpKind getKind(){
+        return this.kind;
+    }
+
+    public OPType getOperator(){
+        return operator;
+    }
+
+    public int getVal(){
+        return val;
+    }
+
+    public StringBuilder getName(){
+        return name;
     }
 }
