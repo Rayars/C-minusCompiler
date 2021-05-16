@@ -1,17 +1,18 @@
 package functions;
 
+import java.util.List;
+
 public class sTreeNode {
     private ExpKind kind;//节点类型
     private OPType operator;//运算符类型
     private int val;//常量值
     private StringBuilder name;//ID
-    private int MaxChildren;
-    public sTreeNode[] Children;
+    public List<sTreeNode> Children;
     public sTreeNode sibling;
 
     public enum ExpKind{
-        operator,val,Identifier,expression,IfStmt,Program,declaration,
-        fun_declaration,var_declaration,var_num,type,
+        operator,Num,Identifier,expression,IfStmt,Program,declaration,
+        fun_declaration,var_declaration,var_num,delimiter,type_spec,
     }
 
     public enum OPType{
@@ -37,9 +38,7 @@ public class sTreeNode {
         }
     }
 
-    public sTreeNode(int Max){
-        MaxChildren=Max;
-        Children=new sTreeNode[Max];
+    public sTreeNode(){
     }
 
     public void setKind(ExpKind kind){
@@ -53,6 +52,8 @@ public class sTreeNode {
     public void setVal(int val){
         this.val=val;
     }
+
+    public void setName(StringBuilder n){this.name=n;}
 
     public ExpKind getKind(){
         return this.kind;

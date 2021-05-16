@@ -4,8 +4,8 @@ import java.io.IOException;
 
 
 public class SyntexAnalysis {
-
-    private Token currentToken,nextToken,thirdToken;//当前token
+    //同一时间保存三个token，语法树根节点SyntexTree
+    private Token currentToken,nextToken,thirdToken;
     private scanner input;//文件流对象
     private sTreeNode SyntexTree;
 
@@ -17,7 +17,15 @@ public class SyntexAnalysis {
         SyntexTree=program();
     }
 
+    public sTreeNode makeLeafNode(sTreeNode.ExpKind kind,Token token){
+        sTreeNode temp=new sTreeNode();
+        temp.setKind(kind);
+        temp.setName(token.getName());
+        return temp;
+    }
+
     public void getToken() throws IOException{
+        //三个token依次向前移动
         if(nextToken!=null){
             currentToken=nextToken;
         }else{
@@ -46,8 +54,16 @@ public class SyntexAnalysis {
     }
 
 
-    public void match(int type) throws IOException{
-        if(currentToken.getType()==type){
+    public void match(String token) throws IOException {
+        if (currentToken.getName().toString() == token) {
+            getToken();
+        }else{
+            error();
+        }
+    }
+
+    public void match(int type) throws IOException {
+        if (currentToken.getType()==type) {
             getToken();
         }else{
             error();
@@ -65,22 +81,22 @@ public class SyntexAnalysis {
     }
 
     public sTreeNode declaration_list() throws IOException{
-        sTreeNode temp= declaration();
+        sTreeNode temp= new sTreeNode();
+        temp.setKind(sTreeNode.ExpKind.declaration);
+        temp.Children.add(declaration());
         if(hasNextToken()){
-            sTreeNode newTemp=new sTreeNode(sTreeNode.ExpKind.declaration);
-            newTemp.leftChild=temp;
-            newTemp.rightChild=declaration_list();
-            temp=newTemp;
+            temp.sibling=declaration_list();
         }
         return temp;
     }
 
     public sTreeNode declaration() throws IOException{//根据第三个Token判断是变量定义还是函数定义
         sTreeNode temp=new sTreeNode();
+        temp.setKind(sTreeNode.ExpKind.declaration);
         if(thirdToken.getName().toString()=="("){
-            temp=fun_declaration();
+            temp.Children.add(fun_declaration());
         }else if(thirdToken.getName().toString()==";"||thirdToken.getName().toString()=="["){
-            temp=var_declaration();
+            temp.Children.add(var_declaration());
         }else{
             error();
         }
@@ -88,21 +104,24 @@ public class SyntexAnalysis {
     }
 
     public sTreeNode var_declaration() throws IOException{
-        sTreeNode temp=new sTreeNode(sTreeNode.ExpKind.var_declaration);
-        temp.leftChild=type_specifier();//消耗一个token
-        if(currentToken.getType()==Token.ID) {
-            temp.rightChild=new sTreeNode(sTreeNode.ExpKind.Identifier,currentToken.getName());
-            match(Token.ID);//如果当前token是ID的话就消耗
-        }else{
-            error();
-        }
-        if(currentToken.getName().toString()==";"){
-            match(Token.Bound);
-        }else if(currentToken.getName().toString()=="["){
-            match(Token.Bound);
-            temp.moreChild=new sTreeNode(sTreeNode.ExpKind.var_num,currentToken.getName());
+        //var_declaration->type_spec ID;|type_spec ID [NUM];
+        sTreeNode temp=new sTreeNode();
+        temp.setKind(sTreeNode.ExpKind.var_declaration);
+        temp.Children.add(type_specifier());
+        temp.Children.add(makeLeafNode(sTreeNode.ExpKind.Identifier,currentToken));
+        match(Token.ID);
+        if(thirdToken.getName().toString()==";"){
+            temp.Children.add(makeLeafNode(sTreeNode.ExpKind.delimiter,currentToken));
+            match(";");
+        }else if(thirdToken.getName().toString()=="["){
+            temp.Children.add(makeLeafNode(sTreeNode.ExpKind.delimiter,currentToken));
+            match("[");
+            temp.Children.add(makeLeafNode(sTreeNode.ExpKind.Num,currentToken));
             match(Token.Num);
-            match(Token.Bound);
+            temp.Children.add(makeLeafNode(sTreeNode.ExpKind.delimiter,currentToken));
+            match("]");
+            temp.Children.add(makeLeafNode(sTreeNode.ExpKind.delimiter,currentToken));
+            match(";");
         }else{
             error();
         }
@@ -110,21 +129,32 @@ public class SyntexAnalysis {
     }
 
     public sTreeNode type_specifier() throws IOException{
-        sTreeNode temp=new sTreeNode();
-        if(currentToken.getName().toString()=="int"||currentToken.getName().toString()=="void") {
-            temp = new sTreeNode(sTreeNode.ExpKind.type, currentToken.getName());
-            match(Token.Reserved);
-        }
+        //type-specifier → int | void
+        sTreeNode temp=makeLeafNode(sTreeNode.ExpKind.type_spec,currentToken);
         return temp;
     }
 
     public sTreeNode fun_declaration() throws IOException{
-        sTreeNode temp=new sTreeNode(sTreeNode.ExpKind.fun_declaration);
-        temp.leftChild=type_specifier()
+        sTreeNode temp=new sTreeNode();
+        temp.setKind(sTreeNode.ExpKind.fun_declaration);
+        temp.Children.add(type_specifier());
+        temp.Children.add(makeLeafNode(sTreeNode.ExpKind.Identifier,currentToken));
+        match(Token.ID);
+        temp.Children.add(makeLeafNode(sTreeNode.ExpKind.delimiter,currentToken));
+        match("(");
+        temp.Children.add(params());
+        temp.Children.add(makeLeafNode(sTreeNode.ExpKind.delimiter,currentToken));
+        match(")");
+        temp.Children.add(compound_stmt());
         return temp;
     }
 
-    public void statement(){
+    public sTreeNode params(){
+
+    }
+
+
+    public sTreeNode compound_stmt(){
 
     }
 }
