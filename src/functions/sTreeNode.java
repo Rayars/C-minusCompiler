@@ -8,11 +8,12 @@ public class sTreeNode {
     private int val;//常量值
     private StringBuilder name;//ID
     public List<sTreeNode> Children;
-    public sTreeNode sibling;
 
     public enum ExpKind{
-        operator,Num,Identifier,expression,IfStmt,Program,declaration,
-        fun_declaration,var_declaration,var_num,delimiter,type_spec,
+        operator,Num,Identifier,expression,expression_stmt,IfStmt,Program,declaration,
+        fun_declaration,var_declaration,local_declaration,var,delimiter,type_spec,params,param_list,param,
+        compound_stmt,statement_list,statement,reserved,iteration_stmt,return_stmt,simple_expression,
+        relop,additive_expression,term,call,args,arg_list
     }
 
     public enum OPType{

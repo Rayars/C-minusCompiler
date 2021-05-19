@@ -9,5 +9,8 @@ public class Compile{
             Token currentToken=input.readToken();
             System.out.println(currentToken.getName().toString());
         }
+
+        SyntexAnalysis syntex=new SyntexAnalysis("C:\\Users\\Rayars\\Desktop\\C-minusCompiler\\src\\test.txt");
+        syntex.printTree();
     }
 }
