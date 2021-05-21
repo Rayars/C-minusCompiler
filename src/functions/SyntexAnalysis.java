@@ -1,8 +1,7 @@
 package functions;
 
-import sun.font.EAttribute;
-
 import java.io.IOException;
+import java.util.List;
 
 
 public class SyntexAnalysis {
@@ -266,7 +265,7 @@ public class SyntexAnalysis {
         sTreeNode temp=new sTreeNode();
         temp.setKind(sTreeNode.ExpKind.statement_list);
         temp.Children.add(statement());
-        if(!currentToken.getName().toString().equals("}")){
+        if(isFirstStmt(currentToken)){
             temp.Children.add(statement_list());
         }
         return temp;
@@ -350,12 +349,12 @@ public class SyntexAnalysis {
     public sTreeNode expression() throws IOException{
         sTreeNode temp=new sTreeNode();
         temp.setKind(sTreeNode.ExpKind.expression);
-        if(currentToken.getType()==Token.ID){
+        if(nextToken.getName().toString().equals("=")&&!thirdToken.getName().toString().equals("=")){
             temp.Children.add(var());
             match("=");
             temp.Children.add(makeLeafNode(sTreeNode.ExpKind.operator,acceptToken));
             temp.Children.add(expression());
-        }else if(currentToken.getName().toString().equals("(") ||currentToken.getType()==Token.Num){
+        }else{
             temp.Children.add(simple_expression());
         }
         return temp;

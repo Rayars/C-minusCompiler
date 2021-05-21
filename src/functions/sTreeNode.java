@@ -1,5 +1,6 @@
 package functions;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class sTreeNode {
@@ -13,7 +14,7 @@ public class sTreeNode {
         operator,Num,Identifier,expression,expression_stmt,IfStmt,Program,declaration,
         fun_declaration,var_declaration,local_declaration,var,delimiter,type_spec,params,param_list,param,
         compound_stmt,statement_list,statement,reserved,iteration_stmt,return_stmt,simple_expression,
-        relop,additive_expression,term,call,args,arg_list
+        additive_expression,term,call,args,arg_list
     }
 
     public enum OPType{
@@ -40,6 +41,7 @@ public class sTreeNode {
     }
 
     public sTreeNode(){
+        this.Children=new ArrayList<sTreeNode>();
     }
 
     public void setKind(ExpKind kind){
