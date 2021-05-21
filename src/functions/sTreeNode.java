@@ -12,9 +12,9 @@ public class sTreeNode {
 
     public enum ExpKind{
         operator,Num,Identifier,expression,expression_stmt,IfStmt,Program,declaration,
-        fun_declaration,var_declaration,local_declaration,var,delimiter,type_spec,params,param_list,param,
+        fun_declaration,var_declaration,local_declaration,var,delimiter,type,params,param_list,param,
         compound_stmt,statement_list,statement,reserved,iteration_stmt,return_stmt,simple_expression,
-        additive_expression,term,call,args,arg_list
+        additive_expression,term,call,args,arg_list,declaration_list,factor,
     }
 
     public enum OPType{
@@ -72,5 +72,24 @@ public class sTreeNode {
 
     public StringBuilder getName(){
         return name;
+    }
+
+    public static void printNode(sTreeNode temp,int level){
+        for(int i=1;i<level;i++){
+            System.out.print("  ");
+        }
+        if(temp.Children.size()==0){//为叶结点
+            //System.out.print("kind:");
+            //System.out.print(temp.getKind().toString());
+            System.out.print("  ");
+            System.out.print("name:");
+            System.out.println(temp.getName().toString());
+            return;
+        }
+        System.out.print("kind:");
+        System.out.println(temp.getKind().toString());
+        for(sTreeNode e:temp.Children){
+            printNode(e,level+1);
+        }
     }
 }

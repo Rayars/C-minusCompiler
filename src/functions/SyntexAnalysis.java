@@ -75,14 +75,20 @@ public class SyntexAnalysis {
             return;
         }
         if(input.HasNextToken()) {
-            thirdToken = input.readToken();
+            //如果读入的token不为空则将其复制给thirdtoken
+            Token newToken = input.readToken();
+            if(newToken!=null){//如果所读取token为空而输入串中又含有其他token，则抛弃当前token
+                thirdToken=newToken;
+            }else{
+                thirdToken=input.readToken();
+            }
         }else{
             thirdToken=null;
         }
     }
 
     public boolean hasNextToken(){
-        return currentToken != null;
+        return input.HasNextToken();
     }
 
 
@@ -115,7 +121,7 @@ public class SyntexAnalysis {
 
     public sTreeNode declaration_list() throws IOException{
         sTreeNode temp= new sTreeNode();
-        temp.setKind(sTreeNode.ExpKind.declaration);
+        temp.setKind(sTreeNode.ExpKind.declaration_list);
         temp.Children.add(declaration());
         if(hasNextToken()){
             temp.Children.add(declaration_list());
@@ -126,12 +132,10 @@ public class SyntexAnalysis {
     public sTreeNode declaration() throws IOException{//根据第三个Token判断是变量定义还是函数定义
         sTreeNode temp=new sTreeNode();
         temp.setKind(sTreeNode.ExpKind.declaration);
-        if(thirdToken.getName().toString().equals("(")){
+        if(thirdToken!=null&&thirdToken.getName().toString().equals("(")){
             temp.Children.add(fun_declaration());
-        }else if(thirdToken.getName().toString().equals(";") || thirdToken.getName().toString().equals("[")){
+        }else if(thirdToken!=null&&(thirdToken.getName().toString().equals(";")||thirdToken.getName().toString().equals("["))){
             temp.Children.add(var_declaration());
-        }else{
-            error();
         }
         return temp;
     }
@@ -170,10 +174,10 @@ public class SyntexAnalysis {
         sTreeNode temp=new sTreeNode();
         if(currentToken.getName().toString().equals("int")) {
             match("int");
-            temp = makeLeafNode(sTreeNode.ExpKind.type_spec, acceptToken);
+            temp = makeLeafNode(sTreeNode.ExpKind.type, acceptToken);
         }else if(currentToken.getName().toString().equals("void")){
             match("void");
-            temp = makeLeafNode(sTreeNode.ExpKind.type_spec, acceptToken);
+            temp = makeLeafNode(sTreeNode.ExpKind.type, acceptToken);
         }
         return temp;
     }
@@ -198,7 +202,7 @@ public class SyntexAnalysis {
         temp.setKind(sTreeNode.ExpKind.params);
         if(currentToken.getName().toString().equals("void")){
             match("void");
-            temp.Children.add(makeLeafNode(sTreeNode.ExpKind.type_spec,acceptToken));
+            temp.Children.add(makeLeafNode(sTreeNode.ExpKind.type,acceptToken));
         }else{
             temp.Children.add(param_list());
         }
@@ -299,6 +303,7 @@ public class SyntexAnalysis {
         temp.Children.add(expression());
         match(")");
         temp.Children.add(makeLeafNode(sTreeNode.ExpKind.delimiter,acceptToken));
+        temp.Children.add(statement());
         if(currentToken.getName().toString().equals("else")){
             match("else");
             temp.Children.add(makeLeafNode(sTreeNode.ExpKind.reserved,acceptToken));
@@ -331,6 +336,8 @@ public class SyntexAnalysis {
             temp.Children.add(makeLeafNode(sTreeNode.ExpKind.delimiter,acceptToken));
         }else{
             temp.Children.add(expression());
+            match(";");
+            temp.Children.add(makeLeafNode(sTreeNode.ExpKind.delimiter,acceptToken));
         }
         return temp;
     }
@@ -420,6 +427,7 @@ public class SyntexAnalysis {
 
     public sTreeNode factor()throws IOException{
         sTreeNode temp=new sTreeNode();
+        temp.setKind(sTreeNode.ExpKind.factor);
         if(currentToken.getName().toString().equals("(")){
             match("(");
             temp.Children.add(makeLeafNode(sTreeNode.ExpKind.delimiter,acceptToken));
@@ -479,7 +487,7 @@ public class SyntexAnalysis {
     }
 
     public void printTree(){
-
+        sTreeNode.printNode(SyntexTree,1);
     }
 }
 

@@ -161,6 +161,7 @@ public class scanner {//创建对象，代表文件的字符流
                                         currentToken.delete(0, 1);//确定为注释，将之前放入的'/'删除
                                         Ch = input.read();
                                     } else {
+                                        //不是注释，是除号，完成token的读取
                                         unget = true;
                                         beforeCh = Ch;
                                         state = DONE;
@@ -171,6 +172,7 @@ public class scanner {//创建对象，代表文件的字符流
                                         sub_state = 2;
                                         Ch = input.read();
                                     } else {
+                                        //处于注释中段
                                         sub_state = 1;
                                         Ch = input.read();
                                     }
@@ -178,6 +180,7 @@ public class scanner {//创建对象，代表文件的字符流
                                 case 2:
                                     if (Ch == '/') {
                                         state = DONE;
+                                        save=false;
                                     } else if (Ch == '*') {
                                         sub_state = 2;
                                         Ch = input.read();
@@ -208,7 +211,6 @@ public class scanner {//创建对象，代表文件的字符流
                         System.exit(1);
                         break;
                     case DONE:
-                        save = true;
                         break;
                 }
             }
@@ -217,6 +219,9 @@ public class scanner {//创建对象，代表文件的字符流
                     TokenType=Token.Reserved;
                 }
                 newToken=new Token(TokenType,currentToken);
+            }else{
+                //如果读进来的是注释则返回null
+                newToken=null;
             }
         }else{
             hasNextToken=false;
